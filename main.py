@@ -1,11 +1,13 @@
 from vault import ZedraVault
 from auth import master_exists
+from generator import generate_password, check_strength
 from ui import (
     show_banner, show_menu, show_passwords,
     prompt_add, prompt_search, prompt_delete,
-    show_success, show_error, console
+    show_success, show_error, show_strength, console
 )
 import getpass
+import time
 
 def main():
     vault = ZedraVault()
@@ -37,8 +39,21 @@ def main():
             show_error("Too many failed attempts. Exiting.")
             return
 
+    last_active = time.time()
+
     while True:
+        if vault.auto_lock_check(last_active):
+            show_error("Vault locked due to inactivity.")
+            master = getpass.getpass("Master password: ")
+            if vault.login(master):
+                show_success("Vault unlocked.")
+                last_active = time.time()
+            else:
+                show_error("Wrong password. Exiting.")
+                break
+
         choice = show_menu()
+        last_active = time.time()
 
         if choice == "1":
             site, username, password, notes = prompt_add()
@@ -62,6 +77,21 @@ def main():
             show_success("Entry deleted.")
 
         elif choice == "5":
+            length = input("Password length (default 16): ").strip()
+            length = int(length) if length.isdigit() else 16
+            pwd = generate_password(length)
+            console.print(f"\n[bold green]Generated: {pwd}[/bold green]")
+
+        elif choice == "6":
+            pwd = input("Enter password to check: ").strip()
+            result = check_strength(pwd)
+            show_strength(result)
+
+        elif choice == "7":
+            filename = vault.export_backup()
+            show_success(f"Backup saved to {filename}")
+
+        elif choice == "8":
             console.print("[cyan]Goodbye. Stay secure.[/cyan]")
             break
 
@@ -69,4 +99,4 @@ def main():
             show_error("Invalid option.")
 
 if __name__ == "__main__":
-    main()	
+    main()

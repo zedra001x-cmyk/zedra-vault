@@ -65,3 +65,14 @@ class ZedraVault:
 
     def is_unlocked(self) -> bool:
         return self.key is not None
+
+    def export_backup(self, filename: str = "zedra_backup.json") -> str:
+        import json
+        entries = self.get_passwords()
+        with open(filename, "w") as f:
+            json.dump(entries, f, indent=4)
+        return filename
+
+    def auto_lock_check(self, last_active: float, timeout: int = 300) -> bool:
+        import time
+        return (time.time() - last_active) > timeout

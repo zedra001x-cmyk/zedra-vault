@@ -17,8 +17,19 @@ def show_menu():
     console.print("[2] View All Passwords")
     console.print("[3] Search Password")
     console.print("[4] Delete Password")
-    console.print("[5] Exit")
+    console.print("[5] Generate Password")
+    console.print("[6] Check Password Strength")
+    console.print("[7] Export Backup")
+    console.print("[8] Exit")
     return input("\nChoose option: ").strip()
+
+def show_strength(result: dict):
+    colors = {"Strong": "green", "Medium": "yellow", "Weak": "red", "Very Weak": "red"}
+    color = colors.get(result["level"], "white")
+    console.print(f"\nStrength: [{color}]{result['level']}[/{color}] ({result['score']}/6)")
+    if result["feedback"]:
+        for tip in result["feedback"]:
+            console.print(f"  [dim]• {tip}[/dim]")
 
 def show_passwords(entries: list):
     if not entries:
