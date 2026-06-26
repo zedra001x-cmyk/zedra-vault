@@ -1,0 +1,4 @@
+master.json
+vault.db
+__pycache__/
+*.pyc
